@@ -387,11 +387,12 @@ sub process_url_list {
                 $data->{'owner_price'} = $1 / 1000;
             }
 
-            # адр
+            # нас пункт
             if ($dom->find('meta[itemprop="addressLocality"]')->first) {
                 $data->{locality} = $dom->find('meta[itemprop="addressLocality"]')->first->attr('content');
             }
 
+            # адр
             if ($dom->find('span[itemprop="streetAddress"]')->first) {
                 $data->{addr} = $dom->find('span[itemprop="streetAddress"]')->first->all_text;
             }
