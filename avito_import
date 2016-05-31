@@ -33,7 +33,7 @@ my $m_avito_url = 'https://m.avito.ru';
 my $META = {
     params => {
         ao_parent_guid => 'a4859da8-9977-4b62-8436-4e1b98c5d13f',
-        default_phone_prefix => '4212',        
+        default_phone_prefix => '4212',
         dict => {
             bathrooms => {
                 '__field__' => 'bathroom_id',
@@ -42,7 +42,7 @@ my $META = {
                 '^с\\/у\\s+разд\\.?$' => 3,
                 '^без\\s+удобств$' => 1,
                 '^с\\/у\\s+совм\\.?$' => 8
-            }, 
+            },
             balconies => {
                 '__field__' => 'balcony_id',
                 '^б\\/з$' => 5,
@@ -165,7 +165,7 @@ sub send_data {
                 say 'fail to send';
             }
         }
-        
+
     }
 }
 
@@ -211,7 +211,7 @@ sub process_url_list {
             next unless $res;
             my $dom = $res->dom;
 
-            # дата размещения   
+            # дата размещения
             my $date_str = $dom->find('div[class~="item-subtitle"]')->first->text;
             my $dt = parse_date($date_str);
             $data->{'add_date'} = $dt->datetime() . $timezone;  # fix it!
@@ -224,7 +224,7 @@ sub process_url_list {
                 if ($params =~ /посуточно/) {
                     $data->{rent_type} = 'short';
                 }
-                
+
             } else {
                 $data->{offer_type_code} = 'sale';
             }
@@ -269,7 +269,7 @@ sub process_url_list {
 
             # описание
             my $dsk = $dom->find('div[itemprop="description"]')->first->all_text;
-            
+
             # id объявления
             my $item_id = $dom->find('span[id="item_id"]')->first->text;
 
@@ -354,7 +354,7 @@ sub process_url_list {
                     }
                 }
                 default {}
-            }            
+            }
 
             # Разделим остальную часть обявления на части и попытаемся вычленить полезную информацию
             my @bp = grep { $_ && length($_) > 1 } trim(split /[,()]/, $data->{'source_media_text'});
@@ -386,12 +386,14 @@ sub process_url_list {
             if ($price =~ /^(\d{1,}).*?$/) {
                 $data->{'owner_price'} = $1 / 1000;
             }
-        
+
             # адр
-            if ($data->{'type_code'} eq 'room' || $data->{'type_code'} eq 'apartment') {
-                if ($dom->find('span[itemprop="streetAddress"]')->first) {
-                    $data->{addr} = $dom->find('span[itemprop="streetAddress"]')->first->all_text;
-                }
+            if ($dom->find('meta[itemprop="addressLocality"]')->first) {
+                $data->{locality} = $dom->find('meta[itemprop="addressLocality"]')->first->attr('content');
+            }
+
+            if ($dom->find('span[itemprop="streetAddress"]')->first) {
+                $data->{addr} = $dom->find('span[itemprop="streetAddress"]')->first->all_text;
             }
 
             my @owner_phones;
@@ -402,7 +404,7 @@ sub process_url_list {
                     $item_phone = $1;
                 }
             });
-            
+
             $pkey = phone_demixer($item_id * 1, $item_phone);
 
             get_res($m_avito_url . $item_url, $avito_url, 'm.avito.ru');
@@ -464,7 +466,7 @@ sub process_url_list {
                         my $img_url = $_->{content};
                         push @{$data->{photos}}, $img_url;
                         #Import::Util::Image::load_image($id, $image, , $config->{storage}->{path}, $avito_config->{crop_image_y});
-                    } 
+                    }
                 });
             } or do {
                 say $@;
@@ -522,7 +524,7 @@ sub get_res {
     my $retry = 15;
 
     my @headers;
-    push @headers, 'Referer' => $referer if $referer; 
+    push @headers, 'Referer' => $referer if $referer;
     push @headers, 'Accept' => $accept if $accept;
     while ($retry > 0) {
         $retry -= 1;
@@ -587,7 +589,7 @@ sub month_num {
         }
         when (/апр/) {
             return 4;
-        }        
+        }
         when (/мая/) {
             return 5;
         }
