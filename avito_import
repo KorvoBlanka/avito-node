@@ -20,6 +20,8 @@ $Data::Dumper::Quotekeys = 0;
 
 no warnings 'experimental';
 
+my $import_server = 'http://localhost:3000';
+
 my $timezone = '+10';
 
 my $parser = DateTime::Format::Strptime->new( pattern => '%Y-%m-%d %H:%M:%S' );
@@ -148,7 +150,7 @@ sub send_data {
     say 'sending data';
 
     for my $data (@{$data_list}) {
-        my $url_str = 'http://192.168.5.1:3000/api/remote_import/upload_result';
+        my $url_str = $import_server . '/api/remote_import/upload_result';
         my $data_str = Dumper $data;
         my $done = 0;
         while (!$done) {
@@ -172,7 +174,7 @@ sub send_data {
 sub get_url_list {
     my $url_list;
 
-    my $tx = $ua->get('http://192.168.5.1:3000/api/remote_import/get_task?source=avito&count=1');
+    my $tx = $ua->get($import_server . '/api/remote_import/get_task?source=avito&count=1');
 
     if (my $res = $tx->success) {
       $url_list = $res->json->{list};
@@ -195,7 +197,7 @@ sub process_url_list {
             source_url => $avito_url . $item_url,
             type_code => 'other',
             offer_type_code => 'sale',
-            photos => [],
+            photo_url => [],
         };
 
         eval {
@@ -394,7 +396,7 @@ sub process_url_list {
 
             # адр
             if ($dom->find('span[itemprop="streetAddress"]')->first) {
-                $data->{addr} = $dom->find('span[itemprop="streetAddress"]')->first->all_text;
+                $data->{address} = $dom->find('span[itemprop="streetAddress"]')->first->all_text;
             }
 
             my @owner_phones;
@@ -465,7 +467,7 @@ sub process_url_list {
                 $dom->find('meta[property="og:image"]')->each (sub {
                     unless ($_->{content} =~ /logo/) {
                         my $img_url = $_->{content};
-                        push @{$data->{photos}}, $img_url;
+                        push @{$data->{photo_url}}, $img_url;
                         #Import::Util::Image::load_image($id, $image, , $config->{storage}->{path}, $avito_config->{crop_image_y});
                     }
                 });
