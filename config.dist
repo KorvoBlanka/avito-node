@@ -1,0 +1,7 @@
+{
+  import_server => 'localhost:3000',
+  pause => 10,
+  phone_prefix => '495',
+  timezone => '+03',
+  media_id => 5
+}

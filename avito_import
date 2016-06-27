@@ -5,6 +5,7 @@ use lib "$FindBin::Bin/..";
 
 use Modern;
 
+use Util::Config;
 use Util::PhoneNum;
 
 use Mojo::ByteStream;
@@ -20,22 +21,21 @@ $Data::Dumper::Quotekeys = 0;
 
 no warnings 'experimental';
 
-my $import_server = 'http://localhost:3000';
+my $config = Util::Config::get_config();
 
-my $timezone = '+10';
+my $import_server = $config->{import_server};
+my $timezone = $config->{timezone};
+my $pause = $config->{pause};
+my $media_id = $config->{media_id};
 
 my $parser = DateTime::Format::Strptime->new( pattern => '%Y-%m-%d %H:%M:%S' );
-my $media_id = 5;
-# avito блочит ip после определенного кол-ва запросов, пуза между "категориями" для избежания блокировки
-my $pause = 10;
+
 my $avito_url = 'https://www.avito.ru';
 my $m_avito_url = 'https://m.avito.ru';
 
 
 my $META = {
     params => {
-        ao_parent_guid => 'a4859da8-9977-4b62-8436-4e1b98c5d13f',
-        default_phone_prefix => '4212',
         dict => {
             bathrooms => {
                 '__field__' => 'bathroom_id',
@@ -226,7 +226,6 @@ sub process_url_list {
                 if ($params =~ /посуточно/) {
                     $data->{rent_type} = 'short';
                 }
-
             } else {
                 $data->{offer_type_code} = 'sale';
             }
@@ -416,7 +415,7 @@ sub process_url_list {
             if ($mr && $mr->json) {
                  my $phone_str = $mr->json->{phone};
                 for my $x (split /[.,;:]/, $phone_str) {
-                    if (my $phone_num = Util::PhoneNum->parse($x, $META->{params}->{default_phone_prefix})) {
+                    if (my $phone_num = Util::PhoneNum->parse($x, $config->{phone_prefix})) {
                         push @owner_phones, $phone_num;
                         say $phone_num;
                     }
