@@ -1,5 +1,6 @@
 {
-  import_server => 'localhost:3000',
+  interface => '185.117.153.149',
+  import_server => 'localhost:19099',
   pause => 10,
   phone_prefix => '495',
   timezone => '+03',

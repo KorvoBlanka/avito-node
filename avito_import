@@ -122,7 +122,10 @@ my $META = {
 
 my $ua = Mojo::UserAgent->new;
 $ua->max_redirects(4);
-
+if ($config->{interface}) {
+    say 'binding to ' . $config->{interface}; 
+    $ua->local_address($config->{interface});
+}
 
 while (1) {
     say 'cycle starts';
