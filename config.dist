@@ -4,5 +4,6 @@
   pause => 10,
   phone_prefix => '495',
   timezone => '+03',
+  time_diff_hack => '7',
   media_id => 5
 }

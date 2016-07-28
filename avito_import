@@ -123,14 +123,14 @@ my $META = {
 my $ua = Mojo::UserAgent->new;
 $ua->max_redirects(4);
 if ($config->{interface}) {
-    say 'binding to ' . $config->{interface}; 
+    say 'binding to ' . $config->{interface};
     $ua->local_address($config->{interface});
 }
 
 while (1) {
     say 'cycle starts';
     import_avito ();
-    sleep 1;
+    sleep 3;
 }
 
 sub import_avito {
@@ -150,9 +150,9 @@ sub send_data {
 
     my $try_count = 10;
 
-    say 'sending data';
-
     for my $data (@{$data_list}) {
+        say 'sending data';
+
         my $url_str = $import_server . '/remoteimport/upload_result';
         my $data_str = Dumper $data;
         my $done = 0;
@@ -219,6 +219,10 @@ sub process_url_list {
             # дата размещения
             my $date_str = $dom->find('div[class~="item-subtitle"]')->first->text;
             my $dt = parse_date($date_str);
+            if ($config->{time_diff_hack}) {
+                my $dur = DateTime::Duration->new(hours => $config->{time_diff_hack});
+                $dt->add_duration($dur);
+            }
             $data->{'add_date'} = $dt->datetime() . $timezone;  # fix it!
             say $data->{'add_date'};
 
