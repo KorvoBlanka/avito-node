@@ -434,7 +434,9 @@ sub process_url_list {
             if ($dom->find('div[class="description_seller"]')->first->text =~ /Агентство/i ) {   # агенство?
                 my $seller = $dom->find('div[id="seller"] strong[itemprop="name"]')->first->all_text;
                 say 'company: ' . $seller;
-                $data->{mediator_company} = $seller;
+                if ($seller !~ /Частное лицо/) {
+                    $data->{mediator_company} = $seller;
+                }
             }
 
             #my $img_url = 'https://www.avito.ru/items/phone/' . $item_id . '?pkey=' . $pkey;
